@@ -1,0 +1,3 @@
+  console.error('❌ Webhook signature verification failed:', error.message);
+  return res.status(400).send(\`Webhook Error: \${error.message}\`);
+}

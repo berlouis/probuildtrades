@@ -1,0 +1,6 @@
+cd /root/workforce-app/Workforce1
+rm -rf .next out
+npm run build
+npm run export
+pm2 restart probuildtrades
+

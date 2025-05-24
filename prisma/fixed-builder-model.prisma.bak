@@ -1,0 +1,14 @@
+model Builder {
+  id             Int         @id @default(autoincrement())
+  name           String
+  licenseState   String?
+  licenseClass   String?
+  licenseExpiry  DateTime?
+  licenseStatus  String?
+  email          String      @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  subscriptions  Subscription[]
+
+  @@map("Builder")
+}

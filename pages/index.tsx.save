@@ -1,0 +1,13 @@
+reset1~reset1~reset1~reset
+reset1~nano /root/workforce-app/Workforce1/pages/index.tsx
+cat > /root/workforce-app/Workforce1/pages/index.tsx << 'EOF'
+export default function Home() {
+  return (
+    <main style={{ padding: '2rem', fontFamily: 'Arial' }}>
+      <h1>🎉 Welcome to RenoSolutions</h1>
+      <p>This is your deployed Next.js homepage!</p>
+    </main>
+  );
+}
+EOF
+

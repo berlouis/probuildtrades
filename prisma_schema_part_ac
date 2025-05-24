@@ -1,0 +1,36 @@
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+
+
+model Plan {
+  subscriptions Subscription[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  price     Float
+  interval String?
+}
+

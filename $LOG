@@ -1,0 +1,121 @@
+=== ESLint ===
+✔ No ESLint warnings or errors
+
+=== TypeScript ===
+
+=== Next.js Build ===
+   ▲ Next.js 15.3.1
+   - Environments: .env
+
+   Linting and checking validity of types ...
+   Creating an optimized production build ...
+   Disabled SWC as replacement for Babel because of custom Babel configuration "babel.config.js" https://nextjs.org/docs/messages/swc-disabled
+ ✓ Compiled successfully in 17.0s
+   Collecting page data ...
+   Generating static pages (0/52) ...
+   Generating static pages (13/52) 
+   Generating static pages (26/52) 
+   Generating static pages (39/52) 
+ ✓ Generating static pages (52/52)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (pages)                                        Size  First Load JS
+┌ ○ /                                               419 B         106 kB
+├   /_app                                             0 B         103 kB
+├ ○ /[slug]                                       2.18 kB         105 kB
+├ ○ /404                                          1.99 kB         105 kB
+├ ○ /admin (348 ms)                               2.54 kB         105 kB
+├ ○ /admin-backup (873 ms)                          288 B         103 kB
+├ ƒ /admin-backup/builders                          536 B         103 kB
+├ ƒ /admin-backup/builders-ssr                      593 B         103 kB
+├ ○ /admin-backup/builders/[builderId]/documents    305 B         103 kB
+├ ○ /admin-backup/builders/[builderId]/flagged      306 B         103 kB
+├ ○ /admin-backup/cache                             522 B         103 kB
+├ ○ /admin-backup/cache/analytics                   520 B         103 kB
+├ ○ /admin-backup/cms (1561 ms)                     543 B         123 kB
+├ ○ /admin-backup/cms/pages (1544 ms)             1.44 kB         124 kB
+├ ○ /admin-backup/cms/pages/[id] (925 ms)           303 B         103 kB
+├ ○ /admin-backup/cms/pages/create (938 ms)       1.34 kB         104 kB
+├ ƒ /admin-backup/dashboard                         517 B         103 kB
+├ ƒ /admin-backup/login                             515 B         103 kB
+├ ○ /admin-backup/media (876 ms)                  6.41 kB         109 kB
+├ ○ /admin-backup/payments (876 ms)                 519 B         103 kB
+├ ○ /admin-backup/payments/reports (868 ms)         525 B         103 kB
+├ ○ /admin-backup/reports                           511 B         103 kB
+├ ○ /admin-backup/reports/builder-status            533 B         103 kB
+├ ○ /admin-backup/subscriptions                     515 B         103 kB
+├ ○ /admin-backup/subscriptions/plans               530 B         103 kB
+├ ○ /admin/builders                               1.46 kB         127 kB
+├ ○ /admin/builders/[builderId]                   1.09 kB         104 kB
+├ ○ /admin/builders/[builderId]/documents         1.18 kB         104 kB
+├ ○ /admin/builders/[builderId]/edit              1.59 kB         104 kB
+├ ○ /admin/builders/[builderId]/flagged (337 ms)   5.4 kB         108 kB
+├ ○ /admin/builders/create                        1.89 kB         104 kB
+├ ○ /admin/builders/documents                     2.56 kB         105 kB
+├ ○ /admin/builders/edit                          1.58 kB         104 kB
+├ ○ /admin/builders/flagged                       2.56 kB         105 kB
+├ ○ /admin/cache                                    520 B         103 kB
+├ ○ /admin/cache/analytics                          517 B         103 kB
+├ ○ /admin/cms                                    2.54 kB         105 kB
+├ ○ /admin/cms/metadata/[id]                      2.56 kB         105 kB
+├ ○ /admin/cms/pages (342 ms)                     2.56 kB         105 kB
+├ ○ /admin/cms/pages/[id]                         1.11 kB         124 kB
+├ ○ /admin/cms/pages/create                       1.33 kB         104 kB
+├ ○ /admin/cms/pages/translations/[id] (342 ms)   1.45 kB         104 kB
+├ ○ /admin/dashboard (348 ms)                     2.55 kB         105 kB
+├ ○ /admin/login (348 ms)                          8.2 kB         111 kB
+├ ○ /admin/media (348 ms)                           861 B         124 kB
+├ ○ /admin/payments (347 ms)                      2.55 kB         105 kB
+├ ○ /admin/payments/plans (341 ms)                2.56 kB         105 kB
+├ ○ /admin/payments/reports                         517 B         103 kB
+├ ○ /admin/reports                                2.55 kB         105 kB
+├ ○ /admin/reports/builder-status                   526 B         103 kB
+├ ƒ /admin/reports/enforcement-log                  722 B         103 kB
+├ ○ /admin/settings                               2.55 kB         105 kB
+├ ○ /admin/state-api                                272 B         103 kB
+├ ○ /admin/subscriptions                          1.02 kB         124 kB
+├ ○ /admin/subscriptions/plans                      527 B         103 kB
+├ ○ /admin/users                                  2.55 kB         105 kB
+├ ○ /admin/users/roles                            2.56 kB         105 kB
+├ ƒ /api/admin/builders                               0 B         103 kB
+├ ƒ /api/admin/builders/[id]                          0 B         103 kB
+├ ƒ /api/admin/builders/[id]/reinstate                0 B         103 kB
+├ ƒ /api/admin/builders/[id]/suspend                  0 B         103 kB
+├ ƒ /api/admin/builders/upload                        0 B         103 kB
+├ ƒ /api/admin/cms                                    0 B         103 kB
+├ ƒ /api/admin/cms/metadata                           0 B         103 kB
+├ ƒ /api/admin/cms/metadata/[id]                      0 B         103 kB
+├ ƒ /api/admin/cms/pages                              0 B         103 kB
+├ ƒ /api/admin/cms/pages/[id]                         0 B         103 kB
+├ ƒ /api/admin/cms/publish                            0 B         103 kB
+├ ƒ /api/admin/media/upload                           0 B         103 kB
+├ ƒ /api/admin/payments                               0 B         103 kB
+├ ƒ /api/admin/roles                                  0 B         103 kB
+├ ƒ /api/admin/settings                               0 B         103 kB
+├ ƒ /api/admin/state-api                              0 B         103 kB
+├ ƒ /api/admin/state-api/[id]/secrets                 0 B         103 kB
+├ ƒ /api/admin/subscriptions                          0 B         103 kB
+├ ƒ /api/admin/subscriptions/cancel                   0 B         103 kB
+├ ƒ /api/admin/subscriptions/validate                 0 B         103 kB
+├ ƒ /api/admin/users                                  0 B         103 kB
+├ ƒ /api/auth/[...nextauth]                           0 B         103 kB
+├ ƒ /api/exit-preview                                 0 B         103 kB
+├ ƒ /api/preview                                      0 B         103 kB
+├ ƒ /api/stripe/create-checkout-session               0 B         103 kB
+├ ƒ /api/system/license-sync                          0 B         103 kB
+├ ƒ /api/webhooks/stripe                              0 B         103 kB
+├ ○ /checkout/stripe                                884 B         103 kB
+└ ƒ /sitemap.xml                                    257 B         103 kB
++ First Load JS shared by all                      104 kB
+  ├ chunks/framework-ce39159f62b862d1.js          57.7 kB
+  ├ chunks/main-ed8a50bd89644d1f.js                 42 kB
+  └ other shared chunks (total)                   4.42 kB
+
+ƒ Middleware                                      61.7 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+Summary of errors (if any):

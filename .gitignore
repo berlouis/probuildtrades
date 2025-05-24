@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.DS_Store
+npm-debug.log
+*.log
+coverage/
+out/
+build/
+.cache/
+*.local
+*.sqlite

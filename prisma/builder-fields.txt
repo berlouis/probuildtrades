@@ -1,0 +1,2 @@
+  licenseExpiry        DateTime?
+  stripeSubscriptionId String?

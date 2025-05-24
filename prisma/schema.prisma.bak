@@ -1,0 +1,601 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
+  name      String?
+  updatedAt DateTime?
+  Builder   Builder[]
+}
+
+model Builder {
+  id                   Int              @id @default(autoincrement())
+  name                 String
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime?        @updatedAt
+  email                String
+  licenseStatus        String           @default("Active")
+  licenseId            String?
+  licenseClass         String?
+  state                String?
+  verified             Boolean?         @default(false)
+  userId               Int?
+  stripeSubscriptionId String?
+  licenseExpiry        DateTime?
+  flagged              Boolean?         @default(false)
+  stripeCustomerId     String?
+  licenseEnforcedAt    DateTime?
+  status               String           @default("ACTIVE")
+  licenseState         String?          @default("NSW")
+  User                 User?            @relation(fields: [userId], references: [id])
+  EnforcementLog       EnforcementLog[]
+  Payment              Payment[]
+  Subscription         Subscription[]
+}
+
+model Metadata {
+  id          Int      @id @default(autoincrement())
+  title       String
+  keywords    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pageSlug    String   @unique
+  type        String   @default("landing")
+  isDraft     Boolean  @default(false)
+  key         String?  @default("default_key")
+  value       String?  @default("default_value")
+}
+
+  type        String   @default("landing")
+  isDraft     Boolean  @default(false)
+  key         String?  @default("default_key")
+  value       String?  @default("default_value")
+}
+
+model StateAPIConfig {
+  id        Int      @id @default(autoincrement())
+  stateCode String
+  apiUrl    String
+  apiKey    String?
+  enabled   Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiToken  String?
+  state     String?  @default("NSW")
+  apiSecret String?  @default("temp_secret")
+}
+
+model CredentialAccessLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  ipAddress String
+  action    String
+  createdAt DateTime @default(now())
+}
+
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model Plan {
+  subscriptions Subscription[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  price     Float
+  interval  String?
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
+  name      String?
+  updatedAt DateTime?
+  Builder   Builder[]
+}
+model Builder {
+  id                   Int              @id @default(autoincrement())
+  name                 String
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime?        @updatedAt
+  email                String
+  licenseStatus        String           @default("Active")
+  licenseId            String?
+  licenseClass         String?
+  state                String?
+  verified             Boolean?         @default(false)
+  userId               Int?
+  stripeSubscriptionId String?
+  licenseExpiry        DateTime?
+  flagged              Boolean?         @default(false)
+  stripeCustomerId     String?
+  licenseEnforcedAt    DateTime?
+  status               String           @default("ACTIVE")
+  licenseState         String?          @default("NSW")
+  User                 User?            @relation(fields: [userId], references: [id])
+  EnforcementLog       EnforcementLog[]
+  Payment              Payment[]
+  Subscription         Subscription[]
+}
+model Metadata {
+  id          Int      @id @default(autoincrement())
+  title       String
+  keywords    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pageSlug    String   @unique
+  type        String   @default("landing")
+  isDraft     Boolean  @default(false)
+  key         String?  @default("default_key")
+  value       String?  @default("default_value")
+}
+
+model StateAPIConfig {
+  id        Int      @id @default(autoincrement())
+  stateCode String
+  apiUrl    String
+  apiKey    String?
+  enabled   Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiToken  String?
+  state     String?  @default("NSW")
+  apiSecret String?  @default("temp_secret")
+}
+
+model CredentialAccessLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  ipAddress String
+  action    String
+  createdAt DateTime @default(now())
+}
+model CredentialAccessLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  ipAddress String
+  action    String
+  createdAt DateTime @default(now())
+}
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  subscriptions Subscription[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  price     Float
+  interval  String?
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  subscriptions Subscription[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  price     Float
+  interval  String?
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model Plan {
+  subscriptions Subscription[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  price     Float
+  interval  String?
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  id            Int           @id @default(autoincrement())
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?
+  price         Float
+  interval      String?
+  subscriptions Subscription[]
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  id             Int            @id @default(autoincrement())
+  name           String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?
+  price          Float
+  interval       String?
+  subscriptions  Subscription[]
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  subscriptions Subscription[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime?
+  price         Float
+  interval      String?
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}
+model CmsPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  type      String   @default("landing")
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+model Plan {
+  id            Int            @id @default(autoincrement())
+  name          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime?
+  price         Float
+  interval      String?
+  subscriptions Subscription[]
+}
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  builderId   Int
+  status      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  cancelledAt DateTime?
+  planId      Int?
+  Builder     Builder   @relation(fields: [builderId], references: [id])
+  Plan        Plan?     @relation(fields: [planId], references: [id])
+}

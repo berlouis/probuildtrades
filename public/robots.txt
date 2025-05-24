@@ -1,0 +1,10 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://renosolutions.com.au
+
+# Sitemaps
+Sitemap: https://renosolutions.com.au/sitemap.xml
+Sitemap: https://renosolutions.com.au/server-sitemap.xml

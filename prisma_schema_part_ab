@@ -1,0 +1,50 @@
+  updatedAt   DateTime @updatedAt
+  pageSlug    String   @unique
+  type        String   @default("landing")
+  isDraft     Boolean  @default(false)
+  key         String?  @default("default_key")
+  value       String?  @default("default_value")
+}
+
+
+model StateAPIConfig {
+  id        Int      @id @default(autoincrement())
+  stateCode String
+  apiUrl    String
+  apiKey    String?
+  enabled   Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiToken  String?
+  state     String?  @default("NSW")
+  apiSecret String?  @default("temp_secret")
+}
+
+model CredentialAccessLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  ipAddress String
+  action    String
+  createdAt DateTime @default(now())
+}
+
+model EnforcementLog {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Builder   Builder  @relation(fields: [builderId], references: [id])
+}
+
+model Subscription {

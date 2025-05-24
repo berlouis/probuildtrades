@@ -1,0 +1,13 @@
+model Builder {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  licenseNumber       String    @unique
+  licenseClass        String
+  state               String
+  verified            Boolean   @default(false)
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  licenseExpiry       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}

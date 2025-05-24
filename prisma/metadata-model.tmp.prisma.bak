@@ -1,0 +1,9 @@
+model Metadata {
+  id          Int      @id @default(autoincrement())
+  pageSlug    String   @unique
+  title       String
+  description String
+  keywords    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
