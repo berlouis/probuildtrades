@@ -1,0 +1,172 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function DuplicatesDashboard() {
+  const [flaggedBuilders, setFlaggedBuilders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFlagged() {
+      setLoading(true);
+      const res = await axios.get("/api/admin/duplicates/flagged");
+      setFlaggedBuilders(res.data.builders || []);
+      setLoading(false);
+    }
+    fetchFlagged();
+  }, []);
+  if (loading) {
+    return <div>Loading flagged duplicates...</div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: "2rem auto" }}>
+      <h2>Flagged Builder Duplicates</h2>
+      <table border="1" cellPadding={6} style={{ width: "100%", background: "#fff" }}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>License ID</th>
+            <th>Status</th>
+            <th>Flag Reason</th>
+            <th>Flagged At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {flaggedBuilders.length === 0 ? (
+            <tr>
+              <td colSpan={8}>No flagged duplicates found.</td>
+            </tr>
+          ) : (
+            flaggedBuilders.map(builder => (
+              <tr key={builder.id}>
+                <td>{builder.id}</td>
+                <td>{builder.name}</td>
+                <td>{builder.email}</td>
+                <td>{builder.licenseId}</td>
+                <td>{builder.licenseStatus}</td>
+                <td>{builder.flagReason}</td>
+                <td>{builder.duplicateFlaggedAt ? new Date(builder.duplicateFlaggedAt).toLocaleString() : ""}</td>
+                <td>
+                  {/* Placeholder for review/resolve action */}
+                  <button disabled>Review</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+  const [flaggedTrades, setFlaggedTrades] = useState([]);
+  const [flaggedCompanies, setFlaggedCompanies] = useState([]);
+
+  useEffect(() => {
+    async function fetchFlagged() {
+      setLoading(true);
+      const [buildersRes, tradesRes, companiesRes] = await Promise.all([
+        axios.get("/api/admin/duplicates/flagged"),
+        axios.get("/api/admin/duplicates/flagged-trades"),
+        axios.get("/api/admin/duplicates/flagged-companies"),
+      ]);
+      setFlaggedBuilders(buildersRes.data.builders || []);
+      setFlaggedTrades(tradesRes.data.trades || []);
+      setFlaggedCompanies(companiesRes.data.companies || []);
+      setLoading(false);
+    }
+    fetchFlagged();
+  }, []);
+
+return (
+    <>
+      <h2 style={{ marginTop: 40 }}>Flagged Trade Duplicates</h2>
+      <table border="1" cellPadding={6} style={{ width: "100%", background: "#fff" }}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>License ID</th>
+            <th>Status</th>
+            <th>Flag Reason</th>
+            <th>Flagged At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {flaggedTrades.length === 0 ? (
+            <tr>
+              <td colSpan={8}>No flagged trade duplicates found.</td>
+            </tr>
+          ) : (
+            flaggedTrades.map(trade => (
+              <tr key={trade.id}>
+                <td>{trade.id}</td>
+                <td>{trade.name}</td>
+                <td>{trade.email}</td>
+                <td>{trade.licenseId}</td>
+                <td>{trade.licenseStatus}</td>
+                <td>{trade.flagReason}</td>
+                <td>{trade.duplicateFlaggedAt ? new Date(trade.duplicateFlaggedAt).toLocaleString() : ""}</td>
+                <td>
+                  {/* Placeholder for review/resolve action */}
+                  <button disabled>Review</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+                <td>
+                  {/* Placeholder for review/resolve action */}
+                  <button disabled>Review</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+      <h2 style={{ marginTop: 40 }}>Flagged Company Duplicates</h2>
+      <table border="1" cellPadding={6} style={{ width: "100%", background: "#fff" }}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>License ID</th>
+            <th>Status</th>
+            <th>Flag Reason</th>
+            <th>Flagged At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {flaggedCompanies.length === 0 ? (
+            <tr>
+              <td colSpan={8}>No flagged company duplicates found.</td>
+            </tr>
+          ) : (
+            flaggedCompanies.map(company => (
+              <tr key={company.id}>
+                <td>{company.id}</td>
+                <td>{company.name}</td>
+                <td>{company.email}</td>
+                <td>{company.licenseId}</td>
+                <td>{company.licenseStatus}</td>
+                <td>{company.flagReason}</td>
+                <td>{company.duplicateFlaggedAt ? new Date(company.duplicateFlaggedAt).toLocaleString() : ""}</td>
+                <td>
+                  {/* Placeholder for review/resolve action */}
+                  <button disabled>Review</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}

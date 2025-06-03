@@ -1,0 +1,30 @@
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setProcessing(true);
+    setError("");
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError("Card element not loaded");
+      setProcessing(false);
+      return;
+    }
+    const { error: createError, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+    });
+    if (createError || !paymentMethod) {
+      setError(createError?.message || "Error creating payment method");
+      setProcessing(false);
+      return;
+    }
+    try {
+await axios.post('/api/subscription/attach-payment-method', {
+        subscriptionId,
+        paymentMethodId: paymentMethod.id,
+      });
+      window.location.reload();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to attach payment method");
+    }
+    setProcessing(false);

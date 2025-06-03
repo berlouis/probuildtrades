@@ -1,0 +1,100 @@
+import { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+import { checkForDuplicateEntity } from "@/lib/checkDuplicateEntity";
+import { sendAlertEmail } from "@/lib/sendAlertEmail";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { id } = req.query;
+
+  if (req.method === "PUT" || req.method === "PATCH") {
+    const { name, email, licenseId, phone, address, ...otherFields } = req.body;
+
+// duplicate-check – only for builder updates
+const duplicate = await checkDuplicateLicense({
+  model: "builder",       // ← use the key the helper expects
+  id: Number(id),         // exclude this record itself
+  licenseId,
+  email,
+  phone,
+  address,
+});
+
+if (duplicate.length > 0) {
+  for (const dup of duplicate) {
+ await prisma.duplicateLicenseFlag.create({
+    data: {
+      builderId: dup.id,
+      matchedField: "licenseId",
+      existingValue: dup.licenseId,
+      attemptedValue: licenseId,
+      reason: "Duplicate detected across Builder, Company, or Trade",
+      },
+    });
+
+ await prisma.builder.update({
+  where: { id: dup.id },
+  data: {
+    flagged: true,                        // soft-lock the record
+    licenseStatus: "Suspended (Duplicate License)",
+    duplicateFlaggedAt: new Date(),       // add a timestamp column if you have one
+  },
+});
+
+ await sendAlertEmail(
+      "admin@probuildtrades.com",
+      "Duplicate License Detected",
+      `<b>Duplicate flagged:</b> ${dup.name ?? "N/A"} (${dup.email ?? "N/A"})<br>
+       <pre>${JSON.stringify(dup, null, 2)}</pre>`
+    );
+  }
+
+    // Use generic checker
+    const duplicates = await checkForDuplicateEntity(
+      "builder",
+      { name, email, licenseId, phone, address },
+      Number(id)
+    );
+
+    if (duplicates.length > 0) {
+      for (const dup of duplicates) {
+        const dupFlag = await prisma.duplicateLicenseFlag.create({
+          data: {
+            builderId: dup.id,
+            matchedField: "duplicate on update",
+            existingValue: JSON.stringify(dup),
+            attemptedValue: JSON.stringify({ name, email, licenseId, phone, address }),
+            reason: "Auto-detected duplicate on update"
+          }
+        });
+        await prisma.builder.update({
+          where: { id: dup.id },
+          data: { flagged: true, licenseStatus: "Suspended (Duplicate Detected)" }
+        });
+        await sendAlertEmail(
+          "admin@probuildtrades.com",
+          "Duplicate License Detected",
+          `<b>Builder flagged:</b> ${name} (${email})<br>
+          <pre>${JSON.stringify(dupFlag, null, 2)}</pre>`
+        );
+      }
+      return res.status(409).json({ error: "Duplicate builder detected. Flagged and suspended.", duplicates });
+    }
+    // If no duplicates, proceed to update the builder
+    const builder = await prisma.builder.update({
+      where: { id: Number(id) },
+      data: {
+        name,
+        email,
+        licenseId,
+        phone,
+        address,
+        ...otherFields
+      }
+    });
+    return res.status(200).json({ builder });
+  }
+
+  // ... handle GET, DELETE, etc.
+  res.status(405).json({ error: "Method not allowed" });
+}
+

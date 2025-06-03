@@ -1,0 +1,10 @@
+model Trade {
+  id               Int      @id @default(autoincrement())
+  name             String
+  isSuspended      Boolean  @default(false)
+  suspensionReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  SubTrade         SubTrade[]
+  EnforcementLog   EnforcementLog[]
+}

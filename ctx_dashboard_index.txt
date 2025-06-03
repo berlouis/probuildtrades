@@ -1,0 +1,31 @@
+            <p><strong>Expires:</strong> {subscription.expiresAt?.slice(0,10)}</p>
+          </div>
+        ) : (
+          <p>You do not have an active subscription.</p>
+        )}
+      </section>
+
+  // State for Change Plan
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [errorPlans, setErrorPlans] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+  const [selectedInterval, setSelectedInterval] = useState<"monthly" | "yearly">("monthly");
+  const [changeSaving, setChangeSaving] = useState(false);
+  const [changeError, setChangeError] = useState("");
+
+  // Fetch available plans for Change Plan
+  useEffect(() => {
+    setLoadingPlans(true);
+    axios
+      .get("/api/admin/plans")
+      .then((res) => setPlans(res.data))
+      .catch(() => setErrorPlans("Failed to load plans."))
+      .finally(() => setLoadingPlans(false));
+  }, []);
+
+      <section style={{ marginTop: 24 }}>
+        <h2>Change Plan</h2>
+        {loadingPlans ? (
+          <p>Loading plans...</p>
+        ) : errorPlans ? (

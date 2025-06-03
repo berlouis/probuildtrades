@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  password       String
+  role           String           @default("user")
+  createdAt      DateTime         @default(now())
+  name           String?
+  updatedAt      DateTime?
+  Builder        Builder[]
+  Subscription   Subscription[]
+  EnforcementLog EnforcementLog[]
+  Trade          Trade[]
+  Company        Company[]
+}
+
+model Builder {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String
+  userId            Int
+  licenseStatus     String
+  licenseClass      String
+  licenseExpiry     DateTime
+  licenseState      String
+  licenseId         String?
+  isSuspended       Boolean   @default(false)
+  suspensionReason  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  flagged           Boolean   @default(false)
+  verified          Boolean   @default(false)
+  licenseEnforcedAt DateTime?
+  stripeCustomerId  String?
+
+  User                  User                   @relation(fields: [userId], references: [id])
+  EnforcementLog        EnforcementLog[]
+  payments              Payment[]
+  DuplicateLicenseFlags DuplicateLicenseFlag[]
+}
+
+model Trade {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String
+  userId            Int
+  licenseStatus     String
+  licenseClass      String
+  licenseExpiry     DateTime
+  licenseState      String
+  licenseId         String?
+  isSuspended       Boolean   @default(false)
+  suspensionReason  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  flagged           Boolean   @default(false)
+  verified          Boolean   @default(false)
+  licenseEnforcedAt DateTime?
+  stripeCustomerId  String?
+
+  User           User             @relation(fields: [userId], references: [id])
+  EnforcementLog EnforcementLog[]
+  SubTrade       SubTrade[]
+  payments       Payment[]
+}
+
+model Company {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String
+  userId            Int
+  address           String?
+  licenseStatus     String
+  licenseClass      String
+  licenseExpiry     DateTime
+  licenseState      String
+  licenseId         String?
+  isSuspended       Boolean   @default(false)
+  suspensionReason  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  flagged           Boolean   @default(false)
+  verified          Boolean   @default(false)
+  licenseEnforcedAt DateTime?
+  stripeCustomerId  String?
+
+  User           User             @relation(fields: [userId], references: [id])
+  EnforcementLog EnforcementLog[]
+  payments       Payment[]
+}
+
+model SubTrade {
+  id        Int      @id @default(autoincrement())
+  tradeId   Int
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  Trade Trade @relation(fields: [tradeId], references: [id])
+}
+
+model DuplicateLicenseFlag {
+  id             Int      @id @default(autoincrement())
+  builderId      Int
+  matchedField   String // e.g. "name", "phone", "address"
+  existingValue  String
+  attemptedValue String
+  reason         String
+  createdAt      DateTime @default(now())
+
+  Builder Builder @relation(fields: [builderId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  amount    Decimal  @db.Decimal(12, 2)
+  status    String   @default("pending") // pending | paid | failed
+  builderId Int?
+  companyId Int?
+  tradeId   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Builder Builder? @relation(fields: [builderId], references: [id])
+  Company Company? @relation(fields: [companyId], references: [id])
+  Trade   Trade?   @relation(fields: [tradeId], references: [id])
+}
+
+model EnforcementLog {
+  id        Int  @id @default(autoincrement())
+  userId    Int? // Linked user (admin or creator)
+  builderId Int? // If enforcement targets a Builder
+  companyId Int? // If enforcement targets a Company
+  tradeId   Int? // If enforcement targets a Trade
+
+  action      String // "auto_suspend", "warn_email_sent", etc.
+  reason      String? // e.g. "License expired"
+  status      String // "success", "failure"
+  performedBy String? // "system", "admin", or username
+  details     String? // Optional JSON, notes, etc.
+
+  createdAt DateTime @default(now())
+
+  // 🔗 Relation references (optional and nullable, as needed)
+  User    User?    @relation(fields: [userId], references: [id])
+  Builder Builder? @relation(fields: [builderId], references: [id])
+  Company Company? @relation(fields: [companyId], references: [id])
+  Trade   Trade?   @relation(fields: [tradeId], references: [id])
+}
+
+model Subscription {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  plan      String // e.g. "monthly", "yearly", "pro"
+  status    String // "active", "cancelled", "expired"
+  startDate DateTime
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+}

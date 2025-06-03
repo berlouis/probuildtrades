@@ -1,0 +1,294 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const fetchPlans = async () => {
+  const res = await axios.get("/api/admin/plans");
+  return res.data;
+};
+
+export default function AdminPlans() {
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchPlans()
+      .then(setPlans)
+      .catch(() => setError("Failed to fetch plans."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div>
+      <h1>Admin Plan Management</h1>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <table border="1" cellPadding={8} style={{ width: "100%", marginTop: 24 }}>
+<thead>
+  <tr>
+    <th>Name</th>
+    <th>Tier</th>
+    <th>Monthly</th>
+    <th>Yearly</th>
+    <th>Description</th>
+    <th>Active?</th>
+    <th>Activate/Deactivate</th> 
+    <th>Edit</th>
+    </tr>
+</thead>
+        <tbody>
+          {plans.map((plan: any) => (
+            <tr key={plan.id}>
+    <td>{plan.name}</td>
+      <td>{plan.tier}</td>
+      <td>{plan.priceMonthly}</td>
+      <td>{plan.priceYearly}</td>
+      <td>{plan.description}</td>
+      <td>{plan.isActive ? "Yes" : "No"}</td>
+      <td>
+        <button
+          onClick={async () => {
+            await axios.post("/api/admin/plans/toggle-active", {
+              id: plan.id,
+              isActive: !plan.isActive,
+            });
+            setPlans(await fetchPlans());
+          }}
+          style={{
+            background: plan.isActive ? "#d22" : "#2d2",
+            color: "#fff",
+          }}
+        >
+          {plan.isActive ? "Deactivate" : "Activate"}
+        </button>
+      </td>
+      <td>
+        <button
+            onClick={() => {
+            setEditingPlan(plan);
+            setEditPlanData({
+              name: plan.name,
+              tier: plan.tier,
+              priceMonthly: plan.priceMonthly?.toString() ?? "",
+              priceYearly: plan.priceYearly?.toString() ?? "",
+              description: plan.description ?? "",
+              isActive: plan.isActive,
+            });
+          }}
+        >
+          Edit
+        </button>
+      </td>            
+
+</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+import React from "react";
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [newPlan, setNewPlan] = useState({
+    name: "",
+    tier: "",
+    priceMonthly: "",
+    priceYearly: "",
+    description: "",
+    isActive: true,
+  });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+      <button onClick={() => setShowCreate(true)} style={{ marginBottom: 16 }}>
+        Create Plan
+      </button>
+      {showCreate && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+          background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999
+        }}>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setSaving(true);
+              setSaveError("");
+              try {
+                await axios.post("/api/admin/plans/create", newPlan);
+                setShowCreate(false);
+                setNewPlan({
+                  name: "", tier: "", priceMonthly: "", priceYearly: "",
+                  description: "", isActive: true,
+                });
+                setPlans(await fetchPlans());
+              } catch (err: any) {
+                setSaveError(err.response?.data?.error || "Failed to save.");
+              }
+              setSaving(false);
+            }}
+            style={{ background: "#fff", padding: 32, borderRadius: 8, minWidth: 320 }}
+          >
+            <h2>Create Plan</h2>
+            <div style={{ marginBottom: 8 }}>
+              <label>Name: <input required value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Tier: <input required value={newPlan.tier} onChange={e => setNewPlan({ ...newPlan, tier: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Monthly Price: <input type="number" step="0.01" required value={newPlan.priceMonthly} onChange={e => setNewPlan({ ...newPlan, priceMonthly: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Yearly Price: <input type="number" step="0.01" required value={newPlan.priceYearly} onChange={e => setNewPlan({ ...newPlan, priceYearly: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Description: <input value={newPlan.description} onChange={e => setNewPlan({ ...newPlan, description: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={newPlan.isActive}
+                  onChange={e => setNewPlan({ ...newPlan, isActive: e.target.checked })}
+                /> Active
+              </label>
+            </div>
+            {saveError && <p style={{ color: "red" }}>{saveError}</p>}
+            <button type="submit" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={() => setShowCreate(false)} style={{ marginLeft: 8 }}>
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
+
+  const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [editPlanData, setEditPlanData] = useState({
+    name: "",
+    tier: "",
+    priceMonthly: "",
+    priceYearly: "",
+    description: "",
+    isActive: true,
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState("");
+<td>
+  <button
+    onClick={() => {
+      setEditingPlan(plan);
+      setEditPlanData({
+        name: plan.name,
+        tier: plan.tier,
+        priceMonthly: plan.priceMonthly?.toString() ?? "",
+        priceYearly: plan.priceYearly?.toString() ?? "",
+        description: plan.description ?? "",
+        isActive: plan.isActive,
+      });
+    }}
+  >
+    Edit
+  </button>
+</td>
+            <th>Edit</th>
+      {editingPlan && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+          background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999
+        }}>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setEditSaving(true);
+              setEditError("");
+              try {
+                await axios.post("/api/admin/plans/edit", {
+                  id: editingPlan.id,
+                  ...editPlanData,
+                });
+                setEditingPlan(null);
+                setEditPlanData({
+                  name: "", tier: "", priceMonthly: "", priceYearly: "",
+                  description: "", isActive: true,
+                });
+                setPlans(await fetchPlans());
+              } catch (err: any) {
+                setEditError(err.response?.data?.error || "Failed to update.");
+              }
+              setEditSaving(false);
+            }}
+            style={{ background: "#fff", padding: 32, borderRadius: 8, minWidth: 320 }}
+          >
+            <h2>Edit Plan</h2>
+            <div style={{ marginBottom: 8 }}>
+              <label>Name: <input required value={editPlanData.name} onChange={e => setEditPlanData({ ...editPlanData, name: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Tier: <input required value={editPlanData.tier} onChange={e => setEditPlanData({ ...editPlanData, tier: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Monthly Price: <input type="number" step="0.01" required value={editPlanData.priceMonthly} onChange={e => setEditPlanData({ ...editPlanData, priceMonthly: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Yearly Price: <input type="number" step="0.01" required value={editPlanData.priceYearly} onChange={e => setEditPlanData({ ...editPlanData, priceYearly: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>Description: <input value={editPlanData.description} onChange={e => setEditPlanData({ ...editPlanData, description: e.target.value })} /></label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={editPlanData.isActive}
+                  onChange={e => setEditPlanData({ ...editPlanData, isActive: e.target.checked })}
+                /> Active
+              </label>
+            </div>
+            {editError && <p style={{ color: "red" }}>{editError}</p>}
+            <button type="submit" disabled={editSaving}>
+              {editSaving ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={() => setEditingPlan(null)} style={{ marginLeft: 8 }}>
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
+      <td>
+        <button
+          onClick={async () => {
+            await axios.post("/api/admin/plans/toggle-active", {
+              id: plan.id,
+              isActive: !plan.isActive,
+            });
+            setPlans(await fetchPlans());
+          }}
+          style={{
+            background: plan.isActive ? "#d22" : "#2d2",
+            color: "#fff",
+          }}
+        >
+          {plan.isActive ? "Deactivate" : "Activate"}
+        </button>
+      </td>
+      <td>
+        <button
+          onClick={() => {
+            setEditingPlan(plan);
+            setEditPlanData({
+              name: plan.name,
+              tier: plan.tier,
+              priceMonthly: plan.priceMonthly?.toString() ?? "",
+              priceYearly: plan.priceYearly?.toString() ?? "",
+              description: plan.description ?? "",
+              isActive: plan.isActive,
+            });
+          }}
+        >
+          Edit
+        </button>
+      </td>
+    </tr>   {/* <-- THIS LINE IS NEEDED INSIDE THE MAP */}
+  ))}        {/* <-- END OF MAP */}

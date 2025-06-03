@@ -1,0 +1,21 @@
+              <td>{sub.expiresAt?.slice(0,10)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+            <th>Force-Cancel</th>
+            <th>Reactivate</th>
+              <td>
+                <button
+                  onClick={async () => {
+                    await axios.post("/api/admin/subscriptions/cancel", {
+                      subscriptionId: sub.id,
+                      reason: "Admin forced cancellation",
+                    });
+                    setSubs(await fetchSubscriptions());
+                  }}
+                  disabled={sub.status !== "active"}
+                  style={{ background: "#d22", color: "#fff" }}

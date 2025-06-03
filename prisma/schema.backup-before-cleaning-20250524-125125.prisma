@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  password       String
+  role           String          @default("user")
+  createdAt      DateTime        @default(now())
+  name           String?
+  updatedAt      DateTime?
+  Builder        Builder[]
+  Subscription   Subscription[]
+
+  // ✅ Add this if EnforcementLog points to userId
+  EnforcementLog EnforcementLog[]
+}
+model Builder {
+  id                      Int      @id @default(autoincrement())
+  name                    String
+  email                   String
+  userId                  Int
+  licenseStatus           String
+  licenseClass            String
+  licenseExpiry           DateTime
+  licenseState            String
+  licenseId               String?
+  isSuspended             Boolean  @default(false)
+  suspensionReason        String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  flagged                 Boolean  @default(false)
+  verified                Boolean  @default(false)
+  licenseEnforcedAt       DateTime?
+  stripeCustomerId        String?
+  User                    User     @relation(fields: [userId], references: [id])
+  EnforcementLog          EnforcementLog[]
+  payments                Payment[]
+  DuplicateLicenseFlags   DuplicateLicenseFlag[]
+
+// in model Builder
+EnforcementLog EnforcementLog[]
+}
+
+model Metadata {
+  id          Int     @id(map: "CMSPageMetadata_pkey") @default(autoincrement())
+  pageId      Int
+  description String
+  keywords    String
+  title       String
+  CMSPage     CMSPage @relation(fields: [pageId], references: [id], map: "CMSPageMetadata_pageId_fkey")
+}
+
+model StateAPIConfig {
+  id        Int      @id @default(autoincrement())
+  stateCode String   @unique
+  apiKey    String
+  endpoint  String
+  isEnabled Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  status      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  activatedAt DateTime?
+  externalId  String    @unique
+  plan        String
+  userId      Int
+  User        User      @relation(fields: [userId], references: [id])
+}
+
+model Plan {
+  id           Int      @id @default(autoincrement())
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  price        Float
+  interval     String?
+  priceMonthly Float    @default(0)
+  priceYearly  Float    @default(0)
+}
+
+model CMSPage {
+  id        Int        @id @default(autoincrement())
+  slug      String     @unique
+  title     String
+  content   String
+  type      String     @default("landing")
+  isDraft   Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime
+  Metadata  Metadata[]
+}
+model Company {
+  id              Int      @id @default(autoincrement())
+  name            String
+  address         String?
+  isSuspended     Boolean  @default(false)
+  suspensionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  EnforcementLog  EnforcementLog[]
+}
+
+model Service {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model SubTrade {
+  id        Int      @id @default(autoincrement())
+  tradeId   Int
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Trade     Trade    @relation(fields: [tradeId], references: [id])
+}
+model Trade {
+  id              Int      @id @default(autoincrement())
+  name            String
+  isSuspended     Boolean  @default(false)
+  suspensionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  SubTrade        SubTrade[]
+  EnforcementLog  EnforcementLog[]
+}
+
+// ───────────────────────────────────────────
+// Payment model (added 2025-05-24)
+// ───────────────────────────────────────────
+model Payment {
+  id        Int      @id @default(autoincrement())
+  builderId Int
+  amount    Decimal  @db.Decimal(12, 2)
+  status    String   @default("pending") // pending | paid | failed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Builder Builder @relation(fields: [builderId], references: [id])
+}
+
+// --- Duplicate License Prevention Enhancements ---
+model DuplicateLicenseFlag {
+  id             Int      @id @default(autoincrement())
+  builderId      Int
+  matchedField   String // e.g. "name", "phone", "address"
+  existingValue  String
+  attemptedValue String
+  reason         String
+  createdAt      DateTime @default(now())
+  Builder        Builder  @relation(fields: [builderId], references: [id])
+}
+model EnforcementLog {
+  id            Int       @id @default(autoincrement())
+  userId        Int?      // User, Builder, Company, or Trade ID (nullable for system actions)
+  builderId     Int?      // Link to Builder if applicable
+  companyId     Int?      // Link to Company if applicable
+  tradeId       Int?      // Link to Trade if applicable
+  action        String    // e.g. "auto_suspend", "auto_cancel", "warn_email_sent"
+  reason        String?   // Detailed reason (e.g. "License expired", "Fraud alert", etc.)
+  status        String    // e.g. "success", "failure"
+  performedBy   String?   // "system", "admin", or specific user
+  details       String?   // Optional JSON/string blob for extra info
+  createdAt     DateTime  @default(now())
+
+  // ✅ Relation links (must be included to make everything else work)
+  User          User?     @relation(fields: [userId], references: [id])
+  Builder       Builder?  @relation(fields: [builderId], references: [id])
+  Company       Company?  @relation(fields: [companyId], references: [id])
+  Trade         Trade?    @relation(fields: [tradeId], references: [id])
+}
+
+// Add these fields inside Builder model:
+model Builder {
+  isSuspended Boolean @default(false)
+  suspensionReason String?
+}
+
+// Add these fields inside Company model:
+model Company {
+  isSuspended Boolean @default(false)
+  suspensionReason String?
+}
+
+// Add these fields inside Trade model:
+model Trade {
+  isSuspended Boolean @default(false)
+  suspensionReason String?
+}
+
