@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const flags = await prisma.duplicateLicenseFlag.findMany({
-    include: { Builder: true },
+   include: { builder: true },
     orderBy: { createdAt: "desc" },
   });
 
