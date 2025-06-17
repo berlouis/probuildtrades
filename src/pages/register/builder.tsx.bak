@@ -1,0 +1,9 @@
+import React from "react";
+export default function BuilderRegister() {
+  return (
+    <div style={{ padding: 32 }}>
+      <h1>Register as a Licensed Builder</h1>
+      <p>This is the registration page for builders.</p>
+    </div>
+  );
+}

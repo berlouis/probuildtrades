@@ -95,6 +95,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // If you allow extra fields, add ...req.body here
         },
       });
+
+// --- BEGIN AUDIT LOG PATCH ---
+  await prisma.auditLog.create({
+    data: {
+      userId: session?.user?.id ? Number(session.user.id) : null,
+      model: "Trade",
+      modelId: updated.id,
+      action: "update",
+      diff: { updatedFields: req.body },
+      ip: Array.isArray(req.headers["x-forwarded-for"])
+        ? req.headers["x-forwarded-for"][0]
+        : (req.headers["x-forwarded-for"] as string | undefined) ??
+          req.socket.remoteAddress ??
+          null,
+    },
+  });
+// --- END AUDIT LOG PATCH ---
+
       return res.status(200).json(updated);
     } catch (err) {
       return res.status(500).json({ error: "Failed to update trade", detail: err instanceof Error ? err.message : String(err) });
@@ -117,10 +135,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "DELETE") {
     try {
-      await prisma.trade.delete({
-        where: { id: Number(id) },
-      });
-      return res.status(204).end();
+    const deletedTrade = await prisma.trade.delete({
+      where: { id: Number(id) },
+    });
+
+    // --- BEGIN AUDIT LOG PATCH ---
+    await prisma.auditLog.create({
+      data: {
+        userId: session?.user?.id ? Number(session.user.id) : null,
+        model: "Trade",
+        modelId: deletedTrade.id,
+        action: "delete",
+        diff: { deletedFields: deletedTrade },
+        ip: Array.isArray(req.headers["x-forwarded-for"])
+          ? req.headers["x-forwarded-for"][0]
+          : (req.headers["x-forwarded-for"] as string | undefined) ??
+            req.socket.remoteAddress ??
+            null,
+      },
+    });
+    // --- END AUDIT LOG PATCH ---
+
+    return res.status(204).end();
+
     } catch (err) {
       return res.status(500).json({ error: "Failed to delete trade", detail: err instanceof Error ? err.message : String(err) });
     }

@@ -75,6 +75,18 @@ const builder = await prisma.builder.create({
     userId,
   },
 });
+
+await prisma.auditLog.create({
+  data: {
+    userId: userId || null,
+    model: "Builder",
+    modelId: builder.id,
+    action: "create",
+    diff: builder, // Optionally: { new: builder }
+    ip: req.headers["x-forwarded-for"]?.toString() || req.socket.remoteAddress || null,
+  },
+});
+
        // Send alert email
         sendAlertEmail(
          "New Builder Registered",

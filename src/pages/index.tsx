@@ -2,6 +2,7 @@ import React from "react";
 import Head from "next/head";
 import HeroSection from "@/components/HeroSection";
 import ServicesMenu from "@/components/ServicesMenu";
+import RegistrationCTA from "@/components/RegistrationCTA";
 
 export default function Home() {
   const handleQuoteClick = () => {
@@ -20,6 +21,7 @@ export default function Home() {
       <main>
         <HeroSection phoneNumber="+61402553642" onQuoteClick={handleQuoteClick} />
         <ServicesMenu />
+        <RegistrationCTA />
       </main>
     </>
   );

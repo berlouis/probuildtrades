@@ -13,6 +13,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     where: { id: parseInt(builderId) },
     data: { licenseStatus: "ACTIVE" },
   });
+// --- BEGIN AUDIT LOG PATCH ---
+await prisma.auditLog.create({
+  data: {
+    userId: null,                         // set an admin ID here if you have it
+    model: "Builder",
+    modelId: builder.id,
+    action: "reinstate",
+    diff: { previousStatus: "SUSPENDED", newStatus: "ACTIVE" },
+    ip: req.headers["x-forwarded-for"]
+      ? Array.isArray(req.headers["x-forwarded-for"])
+        ? req.headers["x-forwarded-for"][0]
+        : req.headers["x-forwarded-for"]
+      : req.socket.remoteAddress ?? null,
+  },
+});
+// --- END AUDIT LOG PATCH ---
 
   await sendEmail(
     builder.email,

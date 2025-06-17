@@ -32,8 +32,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!validation.success) {
       return res.status(422).json({ error: "Invalid input", details: validation.error.flatten() });
     }
-    const { name, email, licenseId, phone, address } = validation.data;
-
+      const { name, email, licenseId, phone, address } = validation.data;
+      const userId = req.body.userId;
     // Build OR filter for duplicate check
     const orFilters = [
       ...(licenseId ? [{ licenseId }] : []),
@@ -94,6 +94,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       return res.status(200).json(updated);
+
+
+
+
     } catch (err) {
       return res.status(500).json({ error: "Failed to update builder", detail: err instanceof Error ? err.message : String(err) });
     }
@@ -113,15 +117,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "DELETE") {
-    try {
-      await prisma.builder.delete({
-        where: { id: Number(id) },
+  try {
+    // Delete the builder and keep the deleted record for audit diff
+    const deletedBuilder = await prisma.builder.delete({
+      where: { id: Number(id) },
+    });
+
+    // --- BEGIN AUDIT LOG PATCH ---
+    await prisma.auditLog.create({
+      data: {
+        userId: session?.user?.id ? Number(session.user.id) : null,
+        model: "Builder",
+        modelId: deletedBuilder.id,
+        action: "delete",
+        diff: { deletedFields: deletedBuilder },
+        ip: req.headers["x-forwarded-for"]
+          ? Array.isArray(req.headers["x-forwarded-for"])
+            ? req.headers["x-forwarded-for"][0]
+            : req.headers["x-forwarded-for"]
+          : null,
+      },
+    });
+    // --- END AUDIT LOG PATCH ---
+
+    return res.status(204).end();
+  } catch (err) {
+    return res
+      .status(500)
+      .json({
+        error: "Failed to delete builder",
+        detail: err instanceof Error ? err.message : String(err),
       });
-      return res.status(204).end();
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to delete builder", detail: err instanceof Error ? err.message : String(err) });
-    }
   }
+ }
 
   res.setHeader("Allow", "GET, PUT, PATCH, DELETE");
   return res.status(405).json({ error: `Method ${req.method} not allowed` });

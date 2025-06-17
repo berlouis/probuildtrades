@@ -22,6 +22,7 @@ model User {
   Trade               Trade[]
   Company             Company[]
   canSubscribe        Boolean          @default(true)
+  isSuspended      Boolean          @default(false)
   pendingEmail        String? // For email change confirmation
   pendingEmailToken   String? // Token for email change
   pendingEmailExpires DateTime? // Token expiry

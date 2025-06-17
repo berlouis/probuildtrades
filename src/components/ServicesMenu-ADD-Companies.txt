@@ -1,0 +1,19 @@
+    {
+      title: "Companies",
+      description: "Register as a registered company.",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-8 w-8 text-purple-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <rect x="4" y="7" width="16" height="10" rx="2" />
+          <path d="M9 17V9a3 3 0 016 0v8" />
+        </svg>
+      ),
+      onClick: () => {
+        alert("Companies service clicked");
+      },
+    },

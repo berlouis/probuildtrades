@@ -1,4 +1,5 @@
-
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { sendAlertEmail } from "@/lib/sendAlertEmail";
@@ -76,6 +77,35 @@ const trade = await prisma.trade.create({
     userId,
   },
 });
+// --- BEGIN AUDIT LOG PATCH ---
+await prisma.auditLog.create({
+  data: {
+    userId: userId ? Number(userId) : null,        // use body-supplied admin ID
+    model: "Trade",
+    modelId: trade.id,
+    action: "create",
+    diff: {
+      createdFields: {
+        name: trade.name,
+        email: trade.email,
+        licenseId: trade.licenseId,
+        phone: trade.phone,
+        address: trade.address,
+        licenseStatus: trade.licenseStatus,
+        licenseClass: trade.licenseClass,
+        licenseExpiry: trade.licenseExpiry,
+        licenseState: trade.licenseState,
+      },
+    },
+    ip: req.headers["x-forwarded-for"]
+      ? Array.isArray(req.headers["x-forwarded-for"])
+        ? req.headers["x-forwarded-for"][0]
+        : req.headers["x-forwarded-for"]
+      : req.socket.remoteAddress ?? null,
+  },
+});
+// --- END AUDIT LOG PATCH ---
+
 sendAlertEmail(
   process.env.ALERT_EMAIL || "admin@example.com",
   "New Trade Registered",

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { sendAlertEmail } from "@/lib/sendAlertEmail";
 import checkDuplicateLicense from "@/lib/checkDuplicateLicense";
 import * as z from "zod";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 // Company update validation schema
 const companyUpdateSchema = z.object({
@@ -19,7 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!id || Array.isArray(id)) {
     return res.status(400).json({ error: "Invalid company ID" });
   }
-
+const session = await getServerSession(req, res, authOptions);
+  if (!session || session.user?.role !== "admin") {
+    return res.status(403).json({ error: "Admin access only." });
+  }
   // ADMIN/ROLE CHECK: Add here if you want, otherwise skip (see Builders for pattern)
 
   if (req.method === "PUT" || req.method === "PATCH") {
@@ -87,6 +92,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           address,
         },
       });
+
+// --- BEGIN AUDIT LOG PATCH ---
+await prisma.auditLog.create({
+  data: {
+    userId: session?.user?.id ? Number(session.user.id) : null,
+    model: "Company",
+    modelId: updated.id,
+    action: "update",
+    diff: { updatedFields: req.body },      // or build a field-level diff
+    ip: Array.isArray(req.headers["x-forwarded-for"])
+      ? req.headers["x-forwarded-for"][0]
+      : (req.headers["x-forwarded-for"] as string | undefined) ??
+        req.socket.remoteAddress ??
+        null,
+  },
+});
+
+// --- END AUDIT LOG PATCH ---
+
       return res.status(200).json(updated);
     } catch (err) {
       return res.status(500).json({ error: "Failed to update company", detail: err instanceof Error ? err.message : String(err) });
@@ -108,16 +132,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "DELETE") {
-    try {
-      await prisma.company.delete({
-        where: { id: Number(id) },
-      });
-      return res.status(204).end();
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to delete company", detail: err instanceof Error ? err.message : String(err) });
-    }
-  }
+  try {
+    const deletedCompany = await prisma.company.delete({
+      where: { id: Number(id) },
+    });
 
+    // --- BEGIN AUDIT LOG PATCH ---
+    await prisma.auditLog.create({
+      data: {
+        userId: session?.user?.id ? Number(session.user.id) : null,
+        model: "Company",
+        modelId: deletedCompany.id,
+        action: "delete",
+        diff: { deletedFields: deletedCompany },
+        ip: Array.isArray(req.headers["x-forwarded-for"])
+          ? req.headers["x-forwarded-for"][0]
+          : (req.headers["x-forwarded-for"] as string | undefined) ??
+            req.socket.remoteAddress ??
+            null,
+      },
+    });
+    // --- END AUDIT LOG PATCH ---
+
+    return res.status(204).end();
+  } catch (err) {
+    return res.status(500).json({
+      error: "Failed to delete company",
+      detail: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
   res.setHeader("Allow", "GET, PUT, PATCH, DELETE");
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }

@@ -1,0 +1,9 @@
+import React from "react";
+export default function TradeRegister() {
+  return (
+    <div style={{ padding: 32 }}>
+      <h1>Register as a Qualified Tradesperson</h1>
+      <p>This is the registration page for tradespeople.</p>
+    </div>
+  );
+}

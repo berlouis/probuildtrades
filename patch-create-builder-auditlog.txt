@@ -1,0 +1,12 @@
+// --- PATCH: Audit Log after Builder Create ---
+await prisma.auditLog.create({
+  data: {
+    userId: userId || null, // Provide userId from request if available
+    model: "Builder",
+    modelId: builder.id,
+    action: "create",
+    diff: builder, // or { new: builder }
+    ip: req.headers["x-forwarded-for"]?.toString() || req.socket.remoteAddress || null,
+  },
+});
+// --- END PATCH ---
